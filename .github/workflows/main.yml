@@ -1,46 +1,37 @@
-name: Build Android APK
+name: Build Al Qadarif APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      PROJECT_DIR: .
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.8'
+          flutter-version: '3.35.0'
           channel: stable
 
-      - name: Extract Flutter project
-        run: |
-          unzip -q al_qadarif_flutter_build_ready.zip -d flutter_project
-          find flutter_project -name pubspec.yaml -print
+      - name: Check Flutter
+        run: flutter --version
 
-      - name: Find project folder
+      - name: Regenerate Android project
         run: |
-          PROJECT_DIR=$(dirname "$(find flutter_project -name pubspec.yaml -print -quit)")
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          - name: Regenerate Android project
-  run: |
-    rm -rf android
-    flutter create --platforms=android .
-  working-directory: ${{ env.PROJECT_DIR }}
-
-- name: Install dependencies
-  run: flutter pub get
-  working-directory: ${{ env.PROJECT_DIR }}
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android .
+          fi
+        working-directory: ${{ env.PROJECT_DIR }}
 
       - name: Install dependencies
         run: flutter pub get
