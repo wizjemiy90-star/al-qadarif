@@ -32,6 +32,15 @@ jobs:
         run: |
           PROJECT_DIR=$(dirname "$(find flutter_project -name pubspec.yaml -print -quit)")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          - name: Regenerate Android project
+  run: |
+    rm -rf android
+    flutter create --platforms=android .
+  working-directory: ${{ env.PROJECT_DIR }}
+
+- name: Install dependencies
+  run: flutter pub get
+  working-directory: ${{ env.PROJECT_DIR }}
 
       - name: Install dependencies
         run: flutter pub get
