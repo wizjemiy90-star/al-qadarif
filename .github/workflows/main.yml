@@ -1,4 +1,4 @@
-name: Build Al Qadarif APK
+name: al_qadarif
 
 on:
   workflow_dispatch:
