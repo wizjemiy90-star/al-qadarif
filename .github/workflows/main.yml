@@ -1,10 +1,11 @@
-- name: Install dependencies
-  working-directory: ./al_qadarif_app
-  run: flutter pub get
+name: Build Android APK
 
-- name: Build APK
-  working-directory: ./al_qadarif_app
-  run: flutter build apk --release
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -21,8 +22,27 @@
         with:
           flutter-version: '3.32.8'
           channel: stable
-- name: Upload APK
-  uses: actions/upload-artifact@v4
-  with:
-    name: al-qadarif-apk
-    path: al_qadarif_app/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Extract Flutter project
+        run: |
+          unzip -q al_qadarif_flutter_build_ready.zip -d flutter_project
+          find flutter_project -name pubspec.yaml -print
+
+      - name: Find project folder
+        run: |
+          PROJECT_DIR=$(dirname "$(find flutter_project -name pubspec.yaml -print -quit)")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Build APK
+        run: flutter build apk --release
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: al-qadarif-apk
+          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
